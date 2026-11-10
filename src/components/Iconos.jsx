@@ -1,7 +1,6 @@
 /**
- * Condor Sky — iconografía SVG del panel (trazo 2px, estilo Lucide).
- * Misma familia visual que el sitio público (web/src/components/Iconos.jsx);
- * reemplaza los emojis del panel (regla de identidad: cero emojis en UI).
+ * Vuela Club — iconografía SVG del panel (trazo 2px, estilo Lucide).
+ * Reemplaza los emojis del panel (regla de identidad: cero emojis en UI).
  * Uso: <Icono name="paracaidas" className="h-5 w-5" />
  */
 

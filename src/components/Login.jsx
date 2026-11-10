@@ -14,9 +14,7 @@ export default function Login() {
     setCargando(true);
     try {
       await signInWithEmailAndPassword(auth, email.trim(), pass);
-      // El gate de App.jsx valida el rol admin tras el login.
     } catch (err) {
-      // Antes TODO error decía "credenciales incorrectas", incluso sin internet.
       const codigo = err?.code || "";
       if (codigo === "auth/network-request-failed") {
         setError("Sin conexión. Revisa tu internet e inténtalo de nuevo.");
@@ -32,32 +30,32 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <img src="/img/logo-condorsky.svg" alt="Condor Sky" className="h-10 w-10 rounded-xl" />
-          <div className="text-xl font-extrabold text-slate-800">
-            Condor <span className="text-blue-600">Sky</span>
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex items-center justify-center gap-3">
+          <img src="/img/logo-condorsky.svg" alt="Vuela Club" className="h-12 w-12 rounded-2xl object-cover shadow-md" />
+          <div className="font-display text-2xl font-extrabold text-slate-900">
+            Vuela <span className="text-[#008427]">Club</span>
           </div>
         </div>
-        <form onSubmit={entrar} className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-          <h1 className="text-lg font-bold text-slate-800">Panel administrativo</h1>
-          <p className="mt-1 text-sm text-slate-500">Acceso solo para personal autorizado.</p>
+        <form onSubmit={entrar} className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
+          <h1 className="font-display text-xl font-extrabold text-slate-900">Panel administrativo</h1>
+          <p className="mt-1 text-xs text-slate-500">Acceso exclusivo para personal autorizado de operaciones.</p>
 
-          <label htmlFor="login-correo" className="mt-5 block text-xs font-semibold uppercase tracking-wide text-slate-600">
-            Correo
+          <label htmlFor="login-correo" className="mt-6 block text-xs font-bold uppercase tracking-wider text-slate-600">
+            Correo electrónico
           </label>
           <input
             id="login-correo"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
-            placeholder="admin@condorsky.co"
+            className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none focus:border-[#008427]"
+            placeholder="admin@vuelaclub.co"
             autoComplete="username"
             required
           />
 
-          <label htmlFor="login-clave" className="mt-4 block text-xs font-semibold uppercase tracking-wide text-slate-600">
+          <label htmlFor="login-clave" className="mt-4 block text-xs font-bold uppercase tracking-wider text-slate-600">
             Contraseña
           </label>
           <input
@@ -65,23 +63,23 @@ export default function Login() {
             type="password"
             value={pass}
             onChange={(e) => setPass(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+            className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none focus:border-[#008427]"
             autoComplete="current-password"
             required
           />
 
-          {error && <p className="mt-3 text-sm text-red-600" role="alert">{error}</p>}
+          {error && <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700" role="alert">{error}</p>}
 
           <button
             type="submit"
             disabled={cargando}
-            className="mt-5 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            className="mt-6 w-full rounded-2xl bg-[#008427] py-4 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:bg-[#00661e] disabled:opacity-50"
           >
-            {cargando ? "Ingresando…" : "Ingresar"}
+            {cargando ? "Ingresando…" : "Ingresar al panel"}
           </button>
         </form>
-        <p className="mt-4 text-center text-xs text-slate-400">
-          Condor Sky · Panel interno
+        <p className="mt-6 text-center text-xs font-semibold text-slate-400">
+          Vuela Club · Panel interno
         </p>
       </div>
     </div>
