@@ -1,0 +1,17 @@
+# Dependencias y build
+node_modules/
+dist/
+
+# Variables de entorno y secretos
+.env
+.env.*
+*.local
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# OS
+.DS_Store
+
+!.env.example

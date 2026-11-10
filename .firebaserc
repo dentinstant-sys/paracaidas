@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "caidalibre-prod"
+  },
+  "targets": {
+    "caidalibre-prod": {
+      "hosting": {
+        "admin": ["condorsky-admin"]
+      }
+    }
+  }
+}

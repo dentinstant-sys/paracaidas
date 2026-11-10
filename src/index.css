@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Vuela Club — Marca & Panel Admin / Web
+   ============================================================ */
+@theme {
+  --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+
+  /* Remapeo semántico de blue-* al Verde Primario (#008427)
+     Así los botones y componentes que ya usaban blue-600 cambian a verde */
+  --color-blue-50:  #f0fdf4;
+  --color-blue-100: #dcfce7;
+  --color-blue-200: #bbf7d0;
+  --color-blue-400: #4ade80;
+  --color-blue-500: #16a34a;
+  --color-blue-600: #008427; /* Verde principal del logo */
+  --color-blue-700: #00661e;
+  --color-blue-800: #004d16;
+
+  /* Tokens de la nueva marca */
+  --color-vuela-verde:  #008427;
+  --color-vuela-azul:   #0038a8;
+  --color-vuela-blanco: #ffffff;
+}
+
+/* Tipografía de títulos con serifas (igual que "VUELA CLUB" en el logo) */
+.font-display { 
+  font-family: 'Cinzel', serif; 
+  letter-spacing: 0.04em; 
+}
+
+/* Estilo para subtítulos / esloganes ("TU SALTO, TU HISTORIA") */
+.font-subhead {
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}

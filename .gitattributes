@@ -1,0 +1,5 @@
+# Los scripts shell deben quedar en LF.
+# bash no tolera CRLF, y en Windows `core.autocrlf=true` los convertiría en cada checkout,
+# rompiendo los scripts shell en clones frescos. Esto NO renormaliza el resto del repo (cero churn de producto).
+# La normalización EOL completa del repo es una decisión aparte: `* text=auto eol=lf`.
+*.sh text eol=lf
