@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { collection, doc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useCollection, useMutation } from "../hooks/useFirestore";
 import { subirImagen, etiquetaFase, textoErrorSubida } from "../lib/upload";
@@ -9,6 +9,12 @@ export default function Galeria() {
   const { data: gallery, error } = useCollection("gallery");
   const { run, saving } = useMutation();
   const [enProceso, setEnProceso] = useState([]);
+  
+  // Estados para la configuración de la imagen de fondo del Hero
+  const [heroImg, setHeroImg] = useState("");
+  const [estadoSubidaHero, setEstadoSubidaHero] = useState(null);
+  const [errorSubidaHero, setErrorSubidaHero] = useState(null);
+
   const keyRef = useRef(0);
   const enProcesoRef = useRef([]);
   enProcesoRef.current = enProceso;
@@ -20,6 +26,21 @@ export default function Galeria() {
     []
   );
 
+  // Cargar la imagen de fondo actual del Hero al montar
+  useEffect(() => {
+    async function fetchHeroConfig() {
+      try {
+        const snap = await getDoc(doc(db, "settings", "general"));
+        if (snap.exists() && snap.data().heroImage) {
+          setHeroImg(snap.data().heroImage);
+        }
+      } catch (err) {
+        console.error("Error al cargar la configuración del hero:", err);
+      }
+    }
+    fetchHeroConfig();
+  }, []);
+
   const actualizar = (key, patch) =>
     setEnProceso((prev) => prev.map((it) => (it.key === key ? { ...it, ...patch } : it)));
 
@@ -30,6 +51,7 @@ export default function Galeria() {
       return prev.filter((x) => x.key !== key);
     });
 
+  // Subir fotos para la galería
   function subir(fileList) {
     for (const file of fileList) {
       const key = `s-${keyRef.current++}`;
@@ -55,9 +77,32 @@ export default function Galeria() {
     }
   }
 
+  // Subir / Cambiar la imagen de fondo del Hero principal
+  async function handleCambiarHero(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setErrorSubidaHero(null);
+    subirImagen(file, "hero", (estado) => setEstadoSubidaHero(estado))
+      .then(async (url) => {
+        await run(
+          () => setDoc(doc(db, "settings", "general"), { heroImage: url }, { merge: true }),
+          "Imagen de portada actualizada"
+        );
+        setHeroImg(url);
+        setEstadoSubidaHero(null);
+      })
+      .catch((err) => {
+        console.error("Error subiendo imagen de hero:", err);
+        setErrorSubidaHero(textoErrorSubida(err));
+        setEstadoSubidaHero(null);
+      });
+  }
+
   async function actualizarAlt(id, alt) {
     await run(() => updateDoc(doc(db, "gallery", id), { alt }), "Texto actualizado");
   }
+
   async function borrar(id) {
     if (!confirm("¿Eliminar esta foto de la galería?")) return;
     await run(() => deleteDoc(doc(db, "gallery", id)), "Foto eliminada");
@@ -68,14 +113,62 @@ export default function Galeria() {
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-1 text-2xl font-bold text-slate-900">Galería</h1>
-      <p className="mb-6 text-sm text-slate-500">Las fotos que se ven en la galería de tu sitio.</p>
+      <h1 className="font-display mb-1 text-2xl font-bold text-slate-900">Galería y Portada</h1>
+      <p className="mb-6 text-sm text-slate-500">Administra la foto de fondo principal del sitio y las imágenes de la galería.</p>
 
       {error && (
         <div className="mb-5 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
           No se pudo cargar. Verifica la conexión con Firebase.
         </div>
       )}
+
+      {/* ======================================================== */}
+      {/* SECCIÓN NUEVA: EDITAR IMAGEN DE FONDO (HERO PRINCIPAL)     */}
+      {/* ======================================================== */}
+      <div className="mb-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+        <h2 className="text-base font-bold text-slate-900 mb-1">Imagen de Fondo (Hero Principal)</h2>
+        <p className="text-xs text-slate-500 mb-4">Esta es la foto grande que aparece en la parte superior al entrar a la página web.</p>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+          <div className="relative h-32 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shrink-0">
+            {heroImg ? (
+              <img src={heroImg} alt="Hero preview" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">Sin imagen</div>
+            )}
+          </div>
+
+          <div className="flex-1 w-full">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-[#008427] px-5 py-3 text-xs font-bold text-white shadow-md transition hover:bg-[#00661e]">
+              <Icono name="camara" className="h-4 w-4" />
+              {saving ? "Guardando..." : "Cambiar imagen de fondo"}
+              <input type="file" accept="image/*,.heic,.heif" className="sr-only" onChange={handleCambiarHero} disabled={saving} />
+            </label>
+
+            {estadoSubidaHero && (
+              <p className="mt-2 text-xs text-slate-600 font-medium">
+                {etiquetaFase(estadoSubidaHero) || "Subiendo y optimizando..."}
+              </p>
+            )}
+
+            {errorSubidaHero && (
+              <p className="mt-2 text-xs font-semibold text-red-600">{errorSubidaHero}</p>
+            )}
+
+            <p className="mt-2 text-[11px] text-slate-400">
+              Sube una foto horizontal de alta calidad. El sistema la comprimirá automáticamente de forma interna.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <hr className="mb-10 border-slate-200" />
+
+      {/* ======================================================== */}
+      {/* SECCIÓN EXISTENTE: GALERÍA DE FOTOS                      */}
+      {/* ======================================================== */}
+      <h2 className="font-display mb-1 text-xl font-bold text-slate-900">Galería de Saltos</h2>
+      <p className="mb-6 text-sm text-slate-500">Las fotos que se muestran en la sección de galería de tu sitio.</p>
 
       {/* Dropzone */}
       <label
@@ -101,7 +194,7 @@ export default function Galeria() {
       {/* Nota de ayuda */}
       <div className="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 px-4 py-3.5 text-sm text-emerald-900">
         <Icono name="destello" className="mt-0.5 h-4 w-4 shrink-0 text-[#008427]" />
-        <p>Tú solo arrastras. Por dentro comprimimos, achicamos y convertimos las fotos de iPhone para que tu sitio cargue rápido.</p>
+        <p>Tú solo arrastras. Por dentro comprimimos, achicamos y convertimos las fotos de iPhone para que tu sitio cargue rápido[cite: 1].</p>
       </div>
 
       {/* En proceso */}
@@ -122,7 +215,7 @@ export default function Galeria() {
       {lista.length > 0 && (
         <>
           <p className="mb-3 text-xs font-semibold text-slate-500">
-            La descripción de cada foto le dice a Google de qué trata y ayuda a quien usa lectores de pantalla.
+            La descripción de cada foto le dice a Google de qué trata y ayuda a quien usa lectores de pantalla[cite: 1].
           </p>
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {lista.map((g) => (
